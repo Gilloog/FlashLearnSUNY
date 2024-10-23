@@ -71,6 +71,7 @@ def show_create_flashcards(self):
 def add_flashcard(self):
     front_text = self.front_entry.get()
     back_text = self.back_entry.get()
+    user_id = self.user_id.get()
     
     if hasattr(self, 'user_id'):
         add_flashcard(user_id, front_text, back_text)
