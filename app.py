@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from auth import register_user, login_user
 from database import init_db
-from flashcards import add_flashcard, get_flashcards
+from flashcards import add_flashcard, get_flashcard
 class FlashLearnApp: 
     def __init__(self, root):
         self.root = root
