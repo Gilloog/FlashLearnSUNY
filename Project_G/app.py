@@ -72,9 +72,11 @@ def add_flashcard(self):
     front_text = self.front_entry.get()
     back_text = self.back_entry.get()
     
-    user_id = 1
-    add_flashcard(user_id, front_text, back_text)
-    messagebox.showinfo("Success", "Flashcard Added")
+    if hasattr(self, 'user_id'):
+        add_flashcard(user_id, front_text, back_text)
+        messagebox.showinfo("Success", "Flashcard Added")
+    else: 
+        messagebox.showerror("Error", "User is not Logged in!")
       
 def show_study_mode(self):
     self.clear_frame()
