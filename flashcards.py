@@ -9,10 +9,10 @@ def add_flashcard(user_id, front, back):
     con.close()
     
 def get_flashcard(user_id):
-    con = get_db_connection
+    con = get_db_connection()
     cursor = con.cursor()
     
-    cursor.execute('SELECT front, back FROM flashcards WHERE user_id = ?', (user_id))
+    cursor.execute('SELECT front, back FROM flashcards WHERE user_id = ?', (user_id,))
     flashcards = cursor.fetchall()
     con.close()
     return flashcards

@@ -86,6 +86,10 @@ class FlashLearnApp:
         user_id = self.user_id
         flashcards = get_flashcard(user_id)
     
+        tk.Button(self.root, text="Next Flashcard", command=self.next_flashcard).pack(pady=10)
+        tk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).pack(pady=10)
+        
+    
         if flashcards: 
             self.current_flashcard = 0
             self.flashcards = flashcards
@@ -93,8 +97,14 @@ class FlashLearnApp:
         else:
             tk.Label(self.root, text="No Flashcards Found").pack()
             
-        tk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).pack()
-
+    def next_flashcard(self):
+        if self.flashcards and self.current_flashcard < len(self.flashcards)-1: 
+            self.current_flashcard += 1
+            self.display_flashcard()
+        else: 
+            messagebox.showinfo("Info", "You have reached the end of the flashcards.")
+            
+            
     def display_flashcard(self):
         front, back = self.flashcards[self.current_flashcard]
         tk.Label(self.root, text=f"Front: {front}").pack()
