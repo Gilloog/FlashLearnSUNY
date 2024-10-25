@@ -3,13 +3,8 @@ import hashlib
 from database import get_db_connection
 
 def register_user(username, password):
-<<<<<<< HEAD
     con = get_db_connection()
     cursor = con.cursor()
-=======
-    connection = get_db_connection()
-    cursor = connection.cursor()
->>>>>>> 1a1052f3cc4f2bcac5ae8c1307f49c52d8e13433
     
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
     
