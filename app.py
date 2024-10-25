@@ -100,9 +100,13 @@ class FlashLearnApp:
     def next_flashcard(self):
         if self.flashcards and self.current_flashcard < len(self.flashcards)-1: 
             self.current_flashcard += 1
+            self.clear_frame()
             self.display_flashcard()
+            
         else: 
             messagebox.showinfo("Info", "You have reached the end of the flashcards.")
+        
+        tk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).pack(pady=10)
             
             
     def display_flashcard(self):
