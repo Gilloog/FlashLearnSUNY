@@ -9,7 +9,7 @@ class FlashLearnApp:
         self.root.title("FlashLearnSUNY")
         self.root.geometry("400x300")
         
-        init_db
+        init_db()
         
         self.show_login_screen()
         
@@ -67,6 +67,7 @@ class FlashLearnApp:
         self.back_entry.insert(0, "Enter Back Text")
     
         tk.Button(self.root, text="Add Flashcard", command=self.add_flashcard).pack()
+        tk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).pack()
     
     def add_flashcard(self):
         front_text = self.front_entry.get()
@@ -82,7 +83,7 @@ class FlashLearnApp:
         self.clear_frame()
         tk.Label(self.root, text="Study Mode").pack()
     
-        user_id = 1
+        user_id = self.user_id
         flashcards = get_flashcard(user_id)
     
         if flashcards: 
@@ -91,6 +92,8 @@ class FlashLearnApp:
             self.display_flashcard()
         else:
             tk.Label(self.root, text="No Flashcards Found").pack()
+            
+        tk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).pack()
 
     def display_flashcard(self):
         front, back = self.flashcards[self.current_flashcard]
