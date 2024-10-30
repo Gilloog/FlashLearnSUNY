@@ -9,7 +9,9 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE, 
         password TEXT NOT NULL,
-        streak INTEGER DEFAULT 0, 
+        streak INTEGER DEFAULT 0,
+        last_login DATE, 
+        badges TEXT DEFAULT '', 
         accuracy REAL DEFAULT 0.0
     )
     ''')
