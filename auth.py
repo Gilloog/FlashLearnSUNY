@@ -22,12 +22,12 @@ def login_user(username, password):
     cursor = conn.cursor()
 
     try:
-        cursor.execute('SELECT * FROM users WHERE username = ? AND password = ?', (username, password)) 
+        cursor.execute('SELECT id, username, password, streak, last_login, badges FROM users WHERE username = ? AND password = ?', (username, password)) 
         user = cursor.fetchone()
 
         if user:
             user_id = user[0]  
-            streak = user[3]  
+            streak = user[3]  if user[3] is not None else 0
             last_login = user[4]  
             badges = user[5] if user[5] else "" 
 
