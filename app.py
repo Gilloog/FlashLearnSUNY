@@ -4,14 +4,14 @@ from auth import register_user, login_user
 from database import init_db
 from database import get_db_connection
 from flashcards import add_flashcard, get_flashcard
-import pyttsx3
+#import pyttsx3 
 
 class FlashLearnApp: 
     def __init__(self, root):
         self.root = root
         self.root.title("FlashLearnSUNY")
         self.root.geometry("400x300")
-        self.engine = pyttsx3.init()
+        #self.engine = pyttsx3.init()
         self.current_page = 0
         init_db()
         
