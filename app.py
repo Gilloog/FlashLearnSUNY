@@ -63,6 +63,8 @@ class FlashLearnApp:
         tk.Button(self.root, text="Edit Flashcards", command=self.show_edit_flashcards_screen).pack()
         
         tk.Button(self.root, text="View Badges", command=self.show_badges_page).pack()
+        
+        tk.Button(self.root, text="Log Out", command=self.show_login_screen).pack(pady = 50)
     
     def show_create_flashcards(self):
         self.clear_frame()
