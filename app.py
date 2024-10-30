@@ -4,11 +4,14 @@ from auth import register_user, login_user
 from database import init_db
 from database import get_db_connection
 from flashcards import add_flashcard, get_flashcard
+import pyttsx3
+
 class FlashLearnApp: 
     def __init__(self, root):
         self.root = root
         self.root.title("FlashLearnSUNY")
         self.root.geometry("400x300")
+        self.engine = pyttsx3.init()
         self.current_page = 0
         init_db()
         
@@ -33,7 +36,7 @@ class FlashLearnApp:
         password = self.password_entry.get()
         user = login_user(username, password)
     
-        if user: 
+        if (user) and (username != ''): 
             
             self.user_id = user[0]
             self.show_main_menu()
@@ -60,6 +63,8 @@ class FlashLearnApp:
         tk.Button(self.root, text="Edit Flashcards", command=self.show_edit_flashcards_screen).pack()
         
         tk.Button(self.root, text="View Badges", command=self.show_badges_page).pack()
+        
+        tk.Button(self.root, text="Log Out", command=self.show_login_screen).pack(pady = 50)
     
     def show_create_flashcards(self):
         self.clear_frame()
@@ -124,13 +129,26 @@ class FlashLearnApp:
             
             
     def display_flashcard(self):
-        front, back = self.flashcards[self.current_flashcard]
-        tk.Label(self.root, text=f"Front: {front}").pack()
-    
-        def flip_card():
-            tk.Label(self.root, text=f"Back: {back}").pack()
         
+        def flip_card():
+            nonlocal front_card, back_card, flip
+            if not flip:
+                front_card.destroy()
+                back_card = tk.Label(self.root, text=f"Back: {back}")
+                back_card.pack()
+            else:
+                back_card.destroy()
+                front_card = tk.Label(self.root, text=f"Front: {front}")
+                front_card.pack()
+            flip = not flip
+            
         tk.Button(self.root, text="Flip", command=flip_card).pack()
+        front, back = self.flashcards[self.current_flashcard]
+        front_card = tk.Label(self.root, text=f"Front: {front}")
+        front_card.pack()
+        flip = False
+        back_card = tk.Label(self.root, text=f"Back: {back}")
+        
 
 
 
