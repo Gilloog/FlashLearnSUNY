@@ -36,7 +36,7 @@ class FlashLearnApp:
         password = self.password_entry.get()
         user = login_user(username, password)
     
-        if user: 
+        if (user) and (username != ''): 
             
             self.user_id = user[0]
             self.show_main_menu()
