@@ -58,6 +58,8 @@ class FlashLearnApp:
         tk.Button(self.root, text="Study Mode", command=self.show_study_mode).pack()
 
         tk.Button(self.root, text="Edit Flashcards", command=self.show_edit_flashcards_screen).pack()
+        
+        tk.Button(self.root, text="View Badges", command=self.show_badges_page).pack()
     
     def show_create_flashcards(self):
         self.clear_frame()
@@ -224,7 +226,32 @@ class FlashLearnApp:
         messagebox.showinfo("Success", "Flashcard Deleted")
         self.show_edit_flashcards_screen()
 
-    
+    def show_badges_page(self):
+        self.clear_frame()
+        
+        tk.Label(self.root, text="Your Badges", font=("Arial", 10)).pack(pady=10)
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT badges FROM users WHERE id = ?", (self.user_id,))
+        result = cursor.fetchone()
+        conn.close()
+        
+        badges = result[0] if result is not None else ""
+        
+        if badges: 
+            tk.Label(self.root, text="Earned Badges:", font=("Arial", 14)).pack(pady=5)
+            badge_list = badges.split(";")
+            
+            for badge in badge_list:
+                if badge.strip():
+                    tk.Label(self.root, text=f"- {badge.strip()}", font=("Arial",12)).pack()
+        else: 
+            tk.Label(self.root, text="No badges earned yet.", font=("Arial", 12)).pack(pady=20)
+        
+        tk.Button(self.root, text="Main Menu", command=self.show_main_menu).pack()
+        
+        
     
     def clear_frame(self):
         for widget in self.root.winfo_children():
