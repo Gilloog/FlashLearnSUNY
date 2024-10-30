@@ -147,7 +147,7 @@ class FlashLearnApp:
             if flip:
                 engine.say({front})
             else:
-                engine.say({front})
+                engine.say({back})
             engine.runAndWait()
         
         tk.Button(self.root, text="Flip", command=flip_card).pack()
