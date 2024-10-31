@@ -145,9 +145,9 @@ class FlashLearnApp:
         def read_side():
             nonlocal flip, engine
             if flip:
-                engine.say({back})
+                engine.say([back])
             else:
-                engine.say({front})
+                engine.say([front])
             engine.runAndWait()
         
         tk.Button(self.root, text="Flip", command=flip_card).pack()
