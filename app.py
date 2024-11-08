@@ -148,16 +148,18 @@ class FlashLearnApp:
             else:
                 engine.say([front])
             engine.runAndWait()
-        
-        tk.Button(self.root, text="Flip", command=flip_card).pack()
-        tk.Button(self.root, text="Read Aloud", command=read_side).pack()
+            
         front, back = self.flashcards[self.current_flashcard]
         front_card = tk.Label(self.root, text=f"Front: {front}")
         front_card.pack()
         flip = False
         back_card = tk.Label(self.root, text=f"Back: {back}")
         engine = self.engine
-
+        tk.Button(self.root, text="Flip", command=flip_card).pack()
+        tk.Button(self.root, text="Read Aloud", command=read_side).pack()
+        
+        
+    
 
 
     def show_edit_flashcards_screen(self):

@@ -16,6 +16,16 @@ def init_db():
     )
     ''')
     
+    cursor.execute("PRAGMA table_info(users)")
+    columns = [column[1] for column in cursor.fetchall()]
+    
+    if 'total_attempts' not in columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN total_attempts INTEGER DEFAULT 0")
+    if 'correct_attempts' not in columns: 
+        cursor.execute("ALTER TABLE users ADD COLUMN correct_attempts INTEGER DEFAULT 0")
+        
+        
+    
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS flashcards (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

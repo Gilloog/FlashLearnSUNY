@@ -2,4 +2,3 @@
 pip install Pillow
  pip install tk 
 
-going to use this document as a way to track notes on what is working/being developed currently. 
