@@ -21,11 +21,10 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER, 
         front TEXT NOT NULL, 
-        back TEXT NOT NULL, 
+        back TEXT NOT NULL,  
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )
     ''')
-    
     con.commit()
     con.close()
 
