@@ -360,7 +360,7 @@ class FlashLearnApp:
         con.commit()
         con.close()
         messagebox.showinfo("Success", "Flashcard Deleted")
-        self.show_edit_flashcards_screen()
+        self.show_edit_flashcards_screen_delete()
 
     def show_badges_page(self):
         self.clear_frame()
