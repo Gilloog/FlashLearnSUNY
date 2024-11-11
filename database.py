@@ -37,7 +37,16 @@ def init_db():
     ''')
     con.commit()
     con.close()
-
+    
+def reset_attempts(user_id):
+        con = get_db_connection()
+        cursor = con.cursor()
+        
+        cursor.execute("""UPDATE users SET total_attempts = 0, correct_attempts = 0 WHERE id = ?""", (user_id,)) 
+        
+        con.commit()
+        con.close()
+        
 def get_db_connection():
     con = sqlite3.connect('flashlearn.db')
     return con

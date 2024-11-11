@@ -13,6 +13,15 @@ def update_user_accuracy(user_id, is_correct):
     
     accuracy = (correct_attempts)/(total_attempts) * 100 if total_attempts > 0 else 0
     
+    cursor.execute("""
+        UPDATE users 
+        SET accuracy = CASE 
+        WHEN total_attempts > 0 THEN (correct_attempts * 100 / total_attempts) 
+        ELSE 0.0 
+        END
+        WHERE id = ?
+    """, (user_id,))
+    
     con.commit()
     con.close()
     

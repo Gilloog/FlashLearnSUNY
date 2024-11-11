@@ -3,7 +3,7 @@ from tkinter import messagebox, ttk
 from auth import register_user, login_user
 from accuracy import update_user_accuracy, get_user_accuracy
 from database import init_db
-from database import get_db_connection
+from database import get_db_connection, reset_attempts
 from flashcards import add_flashcard, get_flashcard
 import pyttsx3 
 
@@ -94,13 +94,16 @@ class FlashLearnApp:
         else: 
             messagebox.showerror("Error", "User is not Logged in!")
     
+    
         
+         
     def show_study_mode(self):
         self.clear_frame()
         ttk.Label(self.root, text="Study Mode", style="Header.TLabel").pack(pady=10)
     
         user_id = self.user_id
         self.flashcards = get_flashcard(user_id)
+        reset_attempts(user_id)
           
         if self.flashcards: 
             self.current_flashcard = 0
@@ -132,10 +135,9 @@ class FlashLearnApp:
             ttk.Button(self.root, text="Main Menu", command=self.show_main_menu).pack(pady=10)
             ttk.Button(self.root, text="Correct", command=lambda: self.record_answer(True)).pack(pady=10)
             ttk.Button(self.root, text="Incorrect", command=lambda: self.record_answer(False)).pack(pady=10)
-            
-            
+             
             accuracy =  get_user_accuracy(self.user_id)
-            ttk.Label(self.root, text=f"Overall Accuracy: {accuracy:.2f}%", style="TLabel").pack(pady=10) 
+            ttk.Label(self.root, text=f"Overall Accuracy: {accuracy:.2f}%", style="TLabel").pack(pady=10)
         else:
             ttk.Label("You have completed all flashcards!", style="TLabel").pack(pady=10)
             ttk.Button(self.root, text="Main Menu", command=self.show_main_menu).pack(pady=10)
@@ -169,14 +171,21 @@ class FlashLearnApp:
     def record_answer(self, is_correct):
         update_user_accuracy(self.user_id, is_correct)
         self.display_flashcard()
-               
+        
+         
+        
     def next_flashcard(self):
         if self.flashcards and self.current_flashcard < len(self.flashcards)-1: 
             self.current_flashcard += 1
             self.clear_frame()
             self.display_flashcard()
         else: 
-            messagebox.showinfo("Info", "You have reached the end of the flashcards.")
+            self.clear_frame()
+            ttk.Label(self.root, text="End of Flashcards. ")
+            accuracy =  get_user_accuracy(self.user_id)
+            ttk.Label(self.root, text=f"Overall Accuracy: {accuracy:.2f}%", style="TLabel").pack(pady=10)
+            ttk.Button(self.root, text="Main Menu", command=self.show_main_menu).pack(pady=10)
+            ttk.Button(self.root, text="Restart Flashcards", command=self.show_study_mode).pack(pady=10)
         
     
             
