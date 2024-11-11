@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 from auth import register_user, login_user
+from accuracy import update_user_accuracy, get_user_accuracy
 from database import init_db
 from database import get_db_connection
 from flashcards import add_flashcard, get_flashcard
@@ -20,16 +21,16 @@ class FlashLearnApp:
     def show_login_screen(self):
         self.clear_frame()
     
-        tk.Label(self.root, text="Username:").pack()
+        ttk.Label(self.root, text="Username:").pack()
         self.username_entry = tk.Entry(self.root)
         self.username_entry.pack()
     
-        tk.Label(self.root, text="Password").pack()
+        ttk.Label(self.root, text="Password").pack()
         self.password_entry = tk.Entry(self.root, show='*')
         self.password_entry.pack()
     
-        tk.Button(self.root, text='Login', command=self.login).pack()
-        tk.Button(self.root, text='Register', command=self.register).pack()
+        ttk.Button(self.root, text='Login', command=self.login).pack()
+        ttk.Button(self.root, text='Register', command=self.register).pack()
     
     def login(self):
         username = self.username_entry.get()
@@ -55,22 +56,22 @@ class FlashLearnApp:
     def show_main_menu(self):
         self.current_page = 0
         self.clear_frame()
-        tk.Label(self.root, text="Welcome to FlashLearnSUNY").pack()
+        ttk.Label(self.root, text="Welcome to FlashLearnSUNY").pack()
     
         #tk.Button(self.root, text="Create Mode", command=self.show_create_flashcards).pack()
-        tk.Button(self.root, text="Study Mode", command=self.show_study_mode).pack()
+        ttk.Button(self.root, text="Study Mode", command=self.show_study_mode).pack()
 
-        tk.Button(self.root, text="Edit Flashcards", command=self.show_edit_flashcards_screen).pack()
+        ttk.Button(self.root, text="Edit Flashcards", command=self.show_edit_flashcards_screen).pack()
         
-        tk.Button(self.root, text="View Badges", command=self.show_badges_page).pack()
+        ttk.Button(self.root, text="View Badges", command=self.show_badges_page).pack()
         
-        tk.Button(self.root, text="Log Out", command=self.show_login_screen).pack(pady = 50)
+        ttk.Button(self.root, text="Log Out", command=self.show_login_screen).pack(pady = 50)
     
     def show_create_flashcards(self):
         self.clear_frame()
-        tk.Label(self.root, text="Flashcard Create Mode").pack()
+        ttk.Label(self.root, text="Flashcard Create Mode").pack()
     
-        self.front_entry = tk.Entry(self.root)
+        self.front_entry = ttk.Entry(self.root)
         self.front_entry.pack()
         self.front_entry.insert(0,"Enter Front Text")
     
@@ -78,8 +79,8 @@ class FlashLearnApp:
         self.back_entry.pack()
         self.back_entry.insert(0, "Enter Back Text")
     
-        tk.Button(self.root, text="Add Flashcard", command=self.add_flashcard).pack()
-        tk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).pack()
+        ttk.Button(self.root, text="Add Flashcard", command=self.add_flashcard).pack()
+        ttk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).pack()
     
     def add_flashcard(self):
         front_text = self.front_entry.get()
@@ -92,79 +93,87 @@ class FlashLearnApp:
             self.show_edit_flashcards_screen()
         else: 
             messagebox.showerror("Error", "User is not Logged in!")
-      
+    
+        
     def show_study_mode(self):
         self.clear_frame()
-        tk.Label(self.root, text="Study Mode").pack()
+        ttk.Label(self.root, text="Study Mode", style="Header.TLabel").pack(pady=10)
     
         user_id = self.user_id
-        flashcards = get_flashcard(user_id)
-    
-        tk.Button(self.root, text="Next Flashcard", command=self.next_flashcard).pack(pady=10)
-        tk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).pack(pady=10)
-        
-    
-        if flashcards: 
+        self.flashcards = get_flashcard(user_id)
+          
+        if self.flashcards: 
             self.current_flashcard = 0
-            self.flashcards = flashcards
             self.display_flashcard()
         else:
-            tk.Label(self.root, text="No Flashcards Found").pack()
+            ttk.Label(self.root, text="No Flashcards Found", style="TLabel").pack()
             
+    def clear_main_frame(self):
+        for widget in self.root.winfo_children():
+            if widget != self.card_frame:
+                widget.destroy()
+                
+                        
+    def display_flashcard(self):
+        
+        self.clear_frame()
+        
+        if self.current_flashcard < len(self.flashcards):
+            front_card, back_card = self.flashcards[self.current_flashcard]   
+            
+           
+            self.flip_card(front_card, back_card, show_front=True)
+            
+            if not hasattr(self, 'card_frame'):
+                self.card_frame = ttk.Frame(self.root)
+                self.card_frame.pack(pady=10)
+                
+            ttk.Button(self.root, text="Next Flashcard", command=self.next_flashcard).pack(pady=10)
+            ttk.Button(self.root, text="Main Menu", command=self.show_main_menu).pack(pady=10)
+            ttk.Button(self.root, text="Correct", command=lambda: self.record_answer(True)).pack(pady=10)
+            ttk.Button(self.root, text="Incorrect", command=lambda: self.record_answer(False)).pack(pady=10)
+            
+            
+            accuracy =  get_user_accuracy(self.user_id)
+            ttk.Label(self.root, text=f"Overall Accuracy: {accuracy:.2f}%", style="TLabel").pack(pady=10) 
+        else:
+            ttk.Label("You have completed all flashcards!", style="TLabel").pack(pady=10)
+            ttk.Button(self.root, text="Main Menu", command=self.show_main_menu).pack(pady=10)
+            
+    def flip_card(self, front_card, back_card, show_front=True):
+        
+        self.clear_main_frame()
+          
+        if show_front:
+            ttk.Label(self.root, text=f"Front: {front_card}", style="TLabel").pack(pady=10)
+            ttk.Button(self.root, text="Flip To Back", command=lambda: self.flip_card(front_card, back_card, show_front=False)).pack(pady=10)
+            
+        else: 
+            ttk.Label(self.root, text=f"Back: {back_card}", style="TLabel").pack(pady=10)
+            ttk.Button(self.root, text="Flip to Front", command=lambda: self.flip_card(front_card, back_card, show_front=True)).pack(pady=10)
+            
+
+    def record_answer(self, is_correct):
+        update_user_accuracy(self.user_id, is_correct)
+        self.display_flashcard()
+               
     def next_flashcard(self):
         if self.flashcards and self.current_flashcard < len(self.flashcards)-1: 
             self.current_flashcard += 1
             self.clear_frame()
-            
-            
-            
-            tk.Button(self.root, text="Next Flashcard", command=self.next_flashcard).pack(pady=10)
-            self.display_flashcard()
-            tk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).pack(pady=10)
         else: 
             messagebox.showinfo("Info", "You have reached the end of the flashcards.")
         
     
             
             
-    def display_flashcard(self):
-        
-        def flip_card():
-            nonlocal front_card, back_card, flip
-            if not flip:
-                front_card.destroy()
-                back_card = tk.Label(self.root, text=f"Back: {back}")
-                back_card.pack()
-            else:
-                back_card.destroy()
-                front_card = tk.Label(self.root, text=f"Front: {front}")
-                front_card.pack()
-            flip = not flip
-
-        def read_side():
-            nonlocal flip, engine
-            if flip:
-                engine.say([back])
-            else:
-                engine.say([front])
-            engine.runAndWait()
-        
-        tk.Button(self.root, text="Flip", command=flip_card).pack()
-        tk.Button(self.root, text="Read Aloud", command=read_side).pack()
-        front, back = self.flashcards[self.current_flashcard]
-        front_card = tk.Label(self.root, text=f"Front: {front}")
-        front_card.pack()
-        flip = False
-        back_card = tk.Label(self.root, text=f"Back: {back}")
-        engine = self.engine
-
-
+    
 
     def show_edit_flashcards_screen(self):
         self.clear_frame()
-        tk.Label(self.root, text="Edit Flashcards").grid(row=0, column=0, columnspan=2, pady=10)
-        tk.Button(self.root, text="Create Flashcard", command=self.show_create_flashcards).grid(row=0, column=0, columnspan=2, pady=5)
-        tk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).grid(row=5, column=0, columnspan=2, pady=5)
+        ttk.Label(self.root, text="Edit Flashcards").grid(row=0, column=0, columnspan=2, pady=10)
+        ttk.Button(self.root, text="Create Flashcard", command=self.show_create_flashcards).grid(row=0, column=0, columnspan=2, pady=5)
+        ttk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).grid(row=5, column=0, columnspan=2, pady=5)
 
         self.flashcards = self.get_flashcards(self.user_id)
         if self.flashcards is None:
@@ -184,19 +193,19 @@ class FlashLearnApp:
         for i, flashcard in enumerate(self.flashcards[start_index:end_index]):
             front, back = flashcard[1], flashcard[2]
             button_text = f"Front: {front}\nBack: {back}"
-            tk.Button(self.root, text=button_text, command=lambda f=flashcard: self.edit_flashcard(f)).grid(row=row, column=col, padx=5, pady=5)
+            ttk.Button(self.root, text=button_text, command=lambda f=flashcard: self.edit_flashcard(f)).grid(row=row, column=col, padx=5, pady=5)
             col += 1
             if col > 1:
                 col = 0
                 row += 1
 
         if (end_index < len(self.flashcards)) & (self.current_page > 0):
-            tk.Button(self.root, text="Next", command=self.next_page).grid(row=4, column=1, columnspan=1, pady=10)
-            tk.Button(self.root, text="Prev", command=self.prev_page).grid(row=4, column=0, columnspan=1, pady=10)
+            ttk.Button(self.root, text="Next", command=self.next_page).grid(row=4, column=1, columnspan=1, pady=10)
+            ttk.Button(self.root, text="Prev", command=self.prev_page).grid(row=4, column=0, columnspan=1, pady=10)
         elif end_index < len(self.flashcards):
-            tk.Button(self.root, text="Next", command=self.next_page).grid(row=4, column=0, columnspan=2, pady=10)
+            ttk.Button(self.root, text="Next", command=self.next_page).grid(row=4, column=0, columnspan=2, pady=10)
         elif self.current_page > 0:
-            tk.Button(self.root, text="Prev", command=self.prev_page).grid(row=4, column=0, columnspan=2, pady=10)
+            ttk.Button(self.root, text="Prev", command=self.prev_page).grid(row=4, column=0, columnspan=2, pady=10)
             
     def next_page(self):
         self.current_page += 1
@@ -219,19 +228,19 @@ class FlashLearnApp:
             
     def edit_flashcard(self, flashcard):
         self.clear_frame()
-        tk.Label(self.root, text="Edit Flashcard").pack()
+        ttk.Label(self.root, text="Edit Flashcard").pack()
 
-        front_text = tk.Entry(self.root)
+        front_text = ttk.Entry(self.root)
         front_text.insert(0, flashcard[1])
         front_text.pack(pady=5)
 
-        back_text = tk.Entry(self.root)
+        back_text = ttk.Entry(self.root)
         back_text.insert(0, flashcard[2])
         back_text.pack(pady=5)
 
-        tk.Button(self.root, text="Save", command=lambda: self.save_flashcard(flashcard[0], front_text.get(), back_text.get())).pack(pady=5)
-        tk.Button(self.root, text="Delete", command=lambda: self.delete_flashcard(flashcard[0])).pack(pady=5)
-        tk.Button(self.root, text="Back", command=self.show_edit_flashcards_screen).pack(pady=10)
+        ttk.Button(self.root, text="Save", command=lambda: self.save_flashcard(flashcard[0], front_text.get(), back_text.get())).pack(pady=5)
+        ttk.Button(self.root, text="Delete", command=lambda: self.delete_flashcard(flashcard[0])).pack(pady=5)
+        ttk.Button(self.root, text="Back", command=self.show_edit_flashcards_screen).pack(pady=10)
         
     def save_flashcard(self, flashcard_id, front, back):
         con = get_db_connection()
@@ -255,7 +264,7 @@ class FlashLearnApp:
     def show_badges_page(self):
         self.clear_frame()
         
-        tk.Label(self.root, text="Your Badges", font=("Arial", 10)).pack(pady=10)
+        ttk.Label(self.root, text="Your Badges", font=("Arial", 10)).pack(pady=10)
         
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -266,16 +275,16 @@ class FlashLearnApp:
         badges = result[0] if result is not None else ""
         
         if badges: 
-            tk.Label(self.root, text="Earned Badges:", font=("Arial", 14)).pack(pady=5)
+            ttk.Label(self.root, text="Earned Badges:", font=("Arial", 14)).pack(pady=5)
             badge_list = badges.split(";")
             
             for badge in badge_list:
                 if badge.strip():
-                    tk.Label(self.root, text=f"- {badge.strip()}", font=("Arial",12)).pack()
+                    ttk.Label(self.root, text=f"- {badge.strip()}", font=("Arial",12)).pack()
         else: 
-            tk.Label(self.root, text="No badges earned yet.", font=("Arial", 12)).pack(pady=20)
+            ttk.Label(self.root, text="No badges earned yet.", font=("Arial", 12)).pack(pady=20)
         
-        tk.Button(self.root, text="Main Menu", command=self.show_main_menu).pack()
+        ttk.Button(self.root, text="Main Menu", command=self.show_main_menu).pack()
         
         
     
