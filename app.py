@@ -80,7 +80,7 @@ class FlashLearnApp:
         self.back_entry.insert(0, "Enter Back Text")
     
         ttk.Button(self.root, text="Add Flashcard", command=self.add_flashcard).pack()
-        ttk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).pack()
+        ttk.Button(self.root, text="Back", command=self.show_edit_flashcards_screen).pack()
     
     def add_flashcard(self):
         front_text = self.front_entry.get()
@@ -186,15 +186,16 @@ class FlashLearnApp:
     def show_edit_flashcards_screen(self):
         self.clear_frame()
         ttk.Label(self.root, text="Edit Flashcards").grid(row=0, column=0, columnspan=2, pady=10)
-        ttk.Button(self.root, text="Create Flashcard", command=self.show_create_flashcards).grid(row=0, column=0, columnspan=2, pady=5)
-        ttk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).grid(row=5, column=0, columnspan=2, pady=5)
+        ttk.Button(self.root, text="Create Flashcard", command=self.show_create_flashcards).grid(row=8, column=1, columnspan=2, pady=5)
+        ttk.Button(self.root, text="Delete Flashcard", command=self.show_edit_flashcards_screen_delete).grid(row=8, column=0, columnspan=2, pady=5)
+        ttk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).grid(row=0, column=0, columnspan=2, pady=5)
 
         self.flashcards = self.get_flashcards(self.user_id)
         if self.flashcards is None:
             self.flashcards = []
 
         #self.current_page = 0
-        self.flashcards_per_page = 6
+        self.flashcards_per_page = 5
         self.display_flashcards()
 
         ##tk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).grid(row=5, column=0, columnspan=2, pady=10)
@@ -205,21 +206,74 @@ class FlashLearnApp:
         row = 1
         col = 0
         for i, flashcard in enumerate(self.flashcards[start_index:end_index]):
-            front, back = flashcard[1], flashcard[2]
-            button_text = f"Front: {front}\nBack: {back}"
-            ttk.Button(self.root, text=button_text, command=lambda f=flashcard: self.edit_flashcard(f)).grid(row=row, column=col, padx=5, pady=5)
+            ttk.Label(self.root, text=f"Flashcard {i+1+start_index}:").grid(row=row, column=col, padx=5, pady=5)
             col += 1
-            if col > 1:
+            front, back = flashcard[1], flashcard[2]
+            front_entry = ttk.Entry(self.root)
+            front_entry.insert(0, front)
+            front_entry.grid(row=row, column=col, padx=5, pady=5)
+            front_entry.bind("<Return>", lambda e, f=flashcard, entry=front_entry: self.update_flashcard_front(f, entry))
+            col += 1
+
+            back_entry = ttk.Entry(self.root)
+            back_entry.insert(0, back)
+            back_entry.grid(row=row, column=col, padx=5, pady=5)
+            back_entry.bind("<Return>", lambda e, f=flashcard, entry=back_entry: self.update_flashcard_back(f, entry))
+            col += 1
+            if col > 2:
                 col = 0
                 row += 1
 
         if (end_index < len(self.flashcards)) & (self.current_page > 0):
-            ttk.Button(self.root, text="Next", command=self.next_page).grid(row=4, column=1, columnspan=1, pady=10)
-            ttk.Button(self.root, text="Prev", command=self.prev_page).grid(row=4, column=0, columnspan=1, pady=10)
+            ttk.Button(self.root, text="Next", command=self.next_page).grid(row=7, column=1, columnspan=1, pady=10)
+            ttk.Button(self.root, text="Prev", command=self.prev_page).grid(row=7, column=0, columnspan=1, pady=10)
         elif end_index < len(self.flashcards):
-            ttk.Button(self.root, text="Next", command=self.next_page).grid(row=4, column=0, columnspan=2, pady=10)
+            ttk.Button(self.root, text="Next", command=self.next_page).grid(row=7, column=0, columnspan=2, pady=10)
         elif self.current_page > 0:
-            ttk.Button(self.root, text="Prev", command=self.prev_page).grid(row=4, column=0, columnspan=2, pady=10)
+            ttk.Button(self.root, text="Prev", command=self.prev_page).grid(row=7, column=0, columnspan=2, pady=10)
+            
+    
+    def show_edit_flashcards_screen_delete(self):
+        self.clear_frame()
+        ttk.Label(self.root, text="Delete Flashcards").grid(row=0, column=0, columnspan=2, pady=10)
+        ttk.Button(self.root, text="Done", command=self.show_edit_flashcards_screen).grid(row=9, column=0, columnspan=2, pady=5)
+
+        self.flashcards = self.get_flashcards(self.user_id)
+        if self.flashcards is None:
+            self.flashcards = []
+
+        #self.current_page = 0
+        self.flashcards_per_page = 5
+        self.display_flashcards_delete()
+    
+    
+    def display_flashcards_delete(self):
+        start_index = self.current_page * self.flashcards_per_page
+        end_index = start_index + self.flashcards_per_page
+        row = 1
+        col = 0
+        for i, flashcard in enumerate(self.flashcards[start_index:end_index]):
+            ttk.Label(self.root, text=f"Flashcard {i+1+start_index}:").grid(row=row, column=col, padx=5, pady=5)
+            col += 1
+            front, back = flashcard[1], flashcard[2]
+            button_text = f"Front: {front}"
+            ttk.Button(self.root, text=button_text, command=lambda f=flashcard: self.delete_flashcard(f[0])).grid(row=row, column=col, padx=5, pady=5)
+            col += 1
+            bt2 = f"Back: {back}"
+            ttk.Button(self.root, text=bt2, command=lambda f=flashcard: self.delete_flashcard(f[0])).grid(row=row, column=col, padx=5, pady=5)
+            col += 1
+            if col > 2:
+                col = 0
+                row += 1
+           
+           
+        if (end_index < len(self.flashcards)) & (self.current_page > 0):
+            ttk.Button(self.root, text="Next", command=self.next_page_delete).grid(row=8, column=1, columnspan=1, pady=10)
+            ttk.Button(self.root, text="Prev", command=self.prev_page_delete).grid(row=8, column=0, columnspan=1, pady=10)
+        elif end_index < len(self.flashcards):
+            ttk.Button(self.root, text="Next", command=self.next_page_delete).grid(row=8, column=0, columnspan=2, pady=10)
+        elif self.current_page > 0:
+            ttk.Button(self.root, text="Prev", command=self.prev_page_delete).grid(row=8, column=0, columnspan=2, pady=10)
             
     def next_page(self):
         self.current_page += 1
@@ -228,6 +282,14 @@ class FlashLearnApp:
     def prev_page(self):
         self.current_page -= 1
         self.show_edit_flashcards_screen()
+        
+    def next_page_delete(self):
+        self.current_page += 1
+        self.show_edit_flashcards_screen_delete()
+        
+    def prev_page_delete(self):
+        self.current_page -= 1
+        self.show_edit_flashcards_screen_delete()
         
         
     def get_flashcards(self, user_id):
@@ -239,6 +301,13 @@ class FlashLearnApp:
         return flashcards
     
     
+    def update_flashcard_front(self, flashcard, entry):
+        #flashcard[1] = entry.get()
+        self.save_flashcard_front(flashcard[0], entry.get())
+
+    def update_flashcard_back(self, flashcard, entry):
+        self.save_flashcard_back(flashcard[0], entry.get())
+     
             
     def edit_flashcard(self, flashcard):
         self.clear_frame()
@@ -263,6 +332,24 @@ class FlashLearnApp:
         con.commit()
         con.close()
         messagebox.showinfo("Success", "Flashcard Changed")
+        self.show_edit_flashcards_screen()
+
+    def save_flashcard_front(self, flashcard_id, front):
+        con = get_db_connection()
+        cursor = con.cursor()
+        cursor.execute('UPDATE flashcards SET front = ? WHERE id = ?', (front, flashcard_id))
+        con.commit()
+        con.close()
+        messagebox.showinfo("Success", "Flashcard Front Changed")
+        self.show_edit_flashcards_screen()
+
+    def save_flashcard_back(self, flashcard_id, back):
+        con = get_db_connection()
+        cursor = con.cursor()
+        cursor.execute('UPDATE flashcards SET back = ? WHERE id = ?', (back, flashcard_id))
+        con.commit()
+        con.close()
+        messagebox.showinfo("Success", "Flashcard Back Changed")
         self.show_edit_flashcards_screen()
 
 
