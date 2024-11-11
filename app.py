@@ -119,9 +119,8 @@ class FlashLearnApp:
             
             
             tk.Button(self.root, text="Next Flashcard", command=self.next_flashcard).pack(pady=10)
-            tk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).pack(pady=10)
             self.display_flashcard()
-            
+            tk.Button(self.root, text="Back to Main Menu", command=self.show_main_menu).pack(pady=10)
         else: 
             messagebox.showinfo("Info", "You have reached the end of the flashcards.")
         
