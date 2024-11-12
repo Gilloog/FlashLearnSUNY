@@ -23,7 +23,7 @@ def init_db():
         cursor.execute("ALTER TABLE users ADD COLUMN total_attempts INTEGER DEFAULT 0")
     if 'correct_attempts' not in columns: 
         cursor.execute("ALTER TABLE users ADD COLUMN correct_attempts INTEGER DEFAULT 0")
-        
+    
         
     
     cursor.execute('''
