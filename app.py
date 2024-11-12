@@ -157,7 +157,7 @@ class FlashLearnApp:
         if not hasattr(self, 'card_frame'):
                 self.card_frame = ttk.Frame(self.root)
                 self.card_frame.pack(pady=10)
-                
+
         ttk.Button(self.root, text="Next Flashcard", command=self.next_flashcard).pack(pady=10)
         ttk.Button(self.root, text="Main Menu", command=self.show_main_menu).pack(pady=10)
         ttk.Button(self.root, text="Correct", command=lambda: self.record_answer(True)).pack(pady=10)
@@ -167,6 +167,13 @@ class FlashLearnApp:
         accuracy =  get_user_accuracy(self.user_id)
         ttk.Label(self.root, text=f"Overall Accuracy: {accuracy:.2f}%", style="TLabel").pack(pady=10) 
             
+    def read_aloud(self, side, back_card, front_card):
+        if side:
+            self.engine.say([front_card])
+        else:
+            self.engine.say([back_card])
+        self.engine.runAndWait()
+
 
     def record_answer(self, is_correct):
         update_user_accuracy(self.user_id, is_correct)
@@ -181,7 +188,7 @@ class FlashLearnApp:
             self.display_flashcard()
         else: 
             self.clear_frame()
-            ttk.Label(self.root, text="End of Flashcards. ")
+            ttk.Label(self.root, text="End of Flashcards.\n")
             accuracy =  get_user_accuracy(self.user_id)
             ttk.Label(self.root, text=f"Overall Accuracy: {accuracy:.2f}%", style="TLabel").pack(pady=10)
             ttk.Button(self.root, text="Main Menu", command=self.show_main_menu).pack(pady=10)
