@@ -16,7 +16,7 @@ class FlashLearnApp:
         self.engine = pyttsx3.init()
         self.current_page = 0
         self.acc_page = 0
-        
+
         init_db()
         
         self.user_id = None
