@@ -1,4 +1,5 @@
 import tkinter as tk
+import random as rand
 from tkinter import messagebox, ttk
 from auth import register_user, login_user, update_streak_badges
 from accuracy import update_user_accuracy, get_user_accuracy
@@ -161,6 +162,7 @@ class FlashLearnApp:
         if show_front:
             ttk.Label(self.content_frame, text=f"Front: {front_card}", style="TLabel").pack(pady=10)
             ttk.Button(self.content_frame, text="Flip To Back", command=lambda: self.flip_card(front_card, back_card, show_front=False)).pack(pady=10)
+            ttk.Button(self.content_frame, text="Read Aloud", command=lambda: self.read_aloud(True,back_card,front_card)).pack(pady=10)
             ttk.Button(self.content_frame, text="Correct", command=lambda: self.record_answer(True)).pack(pady=10)
             ttk.Button(self.content_frame, text="Incorrect", command=lambda: self.record_answer(False)).pack(pady=10)
             accuracy =  get_user_accuracy(self.user_id)
@@ -171,6 +173,7 @@ class FlashLearnApp:
         else: 
             ttk.Label(self.content_frame, text=f"Back: {back_card}", style="TLabel").pack(pady=10)
             ttk.Button(self.content_frame, text="Flip to Front", command=lambda: self.flip_card(front_card, back_card, show_front=True)).pack(pady=10)
+            ttk.Button(self.content_frame, text="Read Aloud", command=lambda: self.read_aloud(False,back_card,front_card)).pack(pady=10)
             ttk.Button(self.content_frame, text="Correct", command=lambda: self.record_answer(True)).pack(pady=10)
             ttk.Button(self.content_frame, text="Incorrect", command=lambda: self.record_answer(False)).pack(pady=10)
             accuracy =  get_user_accuracy(self.user_id)
@@ -438,6 +441,12 @@ class FlashLearnApp:
     def clear_frame(self, frame):
         for widget in frame.winfo_children():
             widget.destroy()    
+
+
+    def shuffle_cards(self,cards):
+        shuffled = cards
+        
+
 
         
 if __name__ == "__main__":
