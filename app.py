@@ -130,8 +130,9 @@ class FlashLearnApp:
         self.flashcards = get_flashcard(user_id)
         reset_attempts(user_id)
           
-        if self.flashcards: 
-            self.current_flashcard = 0
+        if self.flashcards:
+            self.shuffle_order = self.shuffle(self.flashcards) 
+            self.shown_flashcards = 0
             self.display_flashcard()
         else:
             ttk.Label(self.root, text="No Flashcards Found", style="TLabel").pack()
@@ -140,8 +141,8 @@ class FlashLearnApp:
         
         self.clear_frame(self.content_frame)
     
-        if self.current_flashcard < len(self.flashcards):
-            front_card, back_card = self.flashcards[self.current_flashcard]   
+        if self.shown_flashcards < len(self.flashcards):
+            front_card, back_card = self.flashcards[self.shuffle_order[self.shown_flashcards]]   
             
            
             self.flip_card(front_card, back_card, show_front=True)
@@ -198,8 +199,8 @@ class FlashLearnApp:
         
     def next_flashcard(self):
         user_id = self.user_id 
-        if self.flashcards and self.current_flashcard < len(self.flashcards)-1: 
-            self.current_flashcard += 1
+        if self.flashcards and self.shown_flashcards < len(self.flashcards)-1: 
+            self.shown_flashcards += 1
             self.clear_frame(self.content_frame)
             self.display_flashcard()
         else: 
@@ -443,8 +444,14 @@ class FlashLearnApp:
             widget.destroy()    
 
 
-    def shuffle_cards(self,cards):
-        shuffled = cards
+    def shuffle(self,cards):
+        shuffled = []
+        numbers = list(range(len(cards)))
+        while numbers :
+            i = rand.randint(0,len(numbers)-1)
+            shuffled.append(numbers[i])
+            numbers.pop(i)
+        return shuffled
         
 
 
