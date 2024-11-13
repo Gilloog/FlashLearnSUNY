@@ -1,4 +1,5 @@
 import tkinter as tk
+import random as rand
 from tkinter import messagebox, ttk
 from auth import register_user, login_user
 from accuracy import update_user_accuracy, get_user_accuracy
@@ -15,7 +16,7 @@ class FlashLearnApp:
         self.engine = pyttsx3.init()
         self.current_page = 0
         init_db()
-        
+
         self.show_login_screen()
         
     def show_login_screen(self):
@@ -122,22 +123,8 @@ class FlashLearnApp:
         self.clear_frame()
         
         if self.current_flashcard < len(self.flashcards):
-            front_card, back_card = self.flashcards[self.current_flashcard]   
-            
-           
+            front_card, back_card = self.flashcards[self.current_flashcard]
             self.flip_card(front_card, back_card, show_front=True)
-            
-            if not hasattr(self, 'card_frame'):
-                self.card_frame = ttk.Frame(self.root)
-                self.card_frame.pack(pady=10)
-                
-            ttk.Button(self.root, text="Next Flashcard", command=self.next_flashcard).pack(pady=10)
-            ttk.Button(self.root, text="Main Menu", command=self.show_main_menu).pack(pady=10)
-            ttk.Button(self.root, text="Correct", command=lambda: self.record_answer(True)).pack(pady=10)
-            ttk.Button(self.root, text="Incorrect", command=lambda: self.record_answer(False)).pack(pady=10)
-             
-            accuracy =  get_user_accuracy(self.user_id)
-            ttk.Label(self.root, text=f"Overall Accuracy: {accuracy:.2f}%", style="TLabel").pack(pady=10)
         else:
             ttk.Label("You have completed all flashcards!", style="TLabel").pack(pady=10)
             ttk.Button(self.root, text="Main Menu", command=self.show_main_menu).pack(pady=10)
@@ -159,6 +146,7 @@ class FlashLearnApp:
                 self.card_frame.pack(pady=10)
 
         ttk.Button(self.root, text="Next Flashcard", command=self.next_flashcard).pack(pady=10)
+        ttk.Button(self.root ,text="Read Aloud", command= lambda: self.read_aloud(front_card, back_card, show_front)).pack(pady=10)
         ttk.Button(self.root, text="Main Menu", command=self.show_main_menu).pack(pady=10)
         ttk.Button(self.root, text="Correct", command=lambda: self.record_answer(True)).pack(pady=10)
         ttk.Button(self.root, text="Incorrect", command=lambda: self.record_answer(False)).pack(pady=10)
@@ -167,12 +155,14 @@ class FlashLearnApp:
         accuracy =  get_user_accuracy(self.user_id)
         ttk.Label(self.root, text=f"Overall Accuracy: {accuracy:.2f}%", style="TLabel").pack(pady=10) 
             
-    def read_aloud(self, side, back_card, front_card):
-        if side:
-            self.engine.say([front_card])
+    def read_aloud(self, front, back, show_front):
+        if show_front:
+            card = front
         else:
-            self.engine.say([back_card])
+            card = back
+        self.engine.say([card])
         self.engine.runAndWait()
+        
 
 
     def record_answer(self, is_correct):
@@ -407,7 +397,15 @@ class FlashLearnApp:
     
     def clear_frame(self):
         for widget in self.root.winfo_children():
-            widget.destroy()    
+            widget.destroy()
+        
+    def shuffle_cards(self, flashcards):
+        shuffled = []
+        while flashcards:
+            i = rand.randint(0,len(cards)-1)
+            shuffled.append(cards[i])
+            flashcards.pop(i)
+        return shuffled
 
         
 if __name__ == "__main__":
