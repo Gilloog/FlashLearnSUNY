@@ -37,10 +37,10 @@ class FlashLearnApp:
             return 0, ""
         
     def setup_layout(self):
-        self.menu_frame = tk.Frame(self.root, width=150, bg="#355E3B")
+        self.menu_frame = tk.Frame(self.root, width=150, bg="#E9D9C2")
         self.menu_frame.pack(side="left", fill="y")
         
-        self.content_frame = tk.Frame(self.root, bg="#2A3A5E")
+        self.content_frame = tk.Frame(self.root, bg="#C8BAAE")
         self.content_frame.pack(side="right", expand=True, fill="both")
         ttk.Label(self.menu_frame, text="Welcome to FlashLearnSUNY").pack()
         ttk.Button(self.menu_frame, text="Main Menu", command=self.show_main_menu).pack(fill="x", pady=5)
