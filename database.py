@@ -35,6 +35,16 @@ def init_db():
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )
     ''')
+    
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS deck_accuracies (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        accuracy REAL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE 
+    ) 
+    ''')
+    
     con.commit()
     con.close()
     

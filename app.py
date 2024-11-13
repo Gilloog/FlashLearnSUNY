@@ -15,6 +15,7 @@ class FlashLearnApp:
         self.root.geometry("600x400")
         self.engine = pyttsx3.init()
         self.current_page = 0
+        self.acc_page = 0
         
         init_db()
         
@@ -46,6 +47,7 @@ class FlashLearnApp:
         ttk.Button(self.menu_frame, text="Study Mode", command=self.show_study_mode).pack(fill="x", pady=5)
         ttk.Button(self.menu_frame, text="Edit Flashcards", command=self.show_edit_flashcards_screen).pack(fill="x", pady=5)
         ttk.Button(self.menu_frame, text="View Badges", command=self.show_badges_page).pack(fill="x", pady=5)
+        ttk.Button(self.menu_frame, text="Accuracy Stats", command=self.show_acc_page).pack(fill="x", pady=5)
         ttk.Button(self.menu_frame, text="Log Out", command=self.show_login_screen).pack(pady=20)
         
     def show_login_screen(self):
@@ -207,14 +209,25 @@ class FlashLearnApp:
             self.clear_frame(self.content_frame)
             ttk.Label(self.content_frame, text="End of Flashcards.\n")
             accuracy =  get_user_accuracy(self.user_id)
+            #print(type(accuracy))
+            self.save_deck_accuracy(self.user_id, accuracy)
             ttk.Label(self.content_frame, text=f"Overall Accuracy: {accuracy:.2f}%", style="TLabel").pack(pady=10)
+            
+            
             ttk.Button(self.content_frame, text="Restart Flashcards", command=self.show_study_mode).pack(pady=10)
             con = get_db_connection()
             cursor = con.cursor()
             cursor.execute("UPDATE users SET accuracy = 0 WHERE id = ?", (user_id,))
             con.commit()
             con.close()
-        
+    
+    def save_deck_accuracy(self, user_id, accuracy):
+        con = get_db_connection()
+        cursor = con.cursor()
+        cursor.execute('INSERT INTO deck_accuracies (user_id, accuracy) VALUES (?, ?)', (user_id, accuracy))
+        con.commit()
+        con.close()
+
     def show_edit_flashcards_screen(self):
         self.clear_frame(self.content_frame)
         self.content_frame.pack(side="right", expand=True, fill="both")
@@ -247,13 +260,13 @@ class FlashLearnApp:
             front_entry = ttk.Entry(self.content_frame)
             front_entry.insert(0, front)
             front_entry.grid(row=row, column=col, padx=5, pady=5)
-            front_entry.bind("<Return>", lambda e, f=flashcard, entry=front_entry: self.update_flashcard_front(f, entry))
+            front_entry.bind("<FocusOut>", lambda e, f=flashcard, entry=front_entry: self.update_flashcard_front(f, entry))
             col += 1
 
             back_entry = ttk.Entry(self.content_frame)
             back_entry.insert(0, back)
             back_entry.grid(row=row, column=col, padx=5, pady=5)
-            back_entry.bind("<Return>", lambda e, f=flashcard, entry=back_entry: self.update_flashcard_back(f, entry))
+            back_entry.bind("<FocusOut>", lambda e, f=flashcard, entry=back_entry: self.update_flashcard_back(f, entry))
             col += 1
             if col > 2:
                 col = 0
@@ -375,7 +388,7 @@ class FlashLearnApp:
         cursor.execute('UPDATE flashcards SET front = ? WHERE id = ?', (front, flashcard_id))
         con.commit()
         con.close()
-        messagebox.showinfo("Success", "Flashcard Front Changed")
+        #messagebox.showinfo("Success", "Flashcard Front Changed")
         self.show_edit_flashcards_screen()
 
     def save_flashcard_back(self, flashcard_id, back):
@@ -384,7 +397,7 @@ class FlashLearnApp:
         cursor.execute('UPDATE flashcards SET back = ? WHERE id = ?', (back, flashcard_id))
         con.commit()
         con.close()
-        messagebox.showinfo("Success", "Flashcard Back Changed")
+        #messagebox.showinfo("Success", "Flashcard Back Changed")
         self.show_edit_flashcards_screen()
 
 
@@ -452,7 +465,62 @@ class FlashLearnApp:
             shuffled.append(numbers[i])
             numbers.pop(i)
         return shuffled
+    
+    
+    def show_acc_page(self):
+        acc_nontent = 10
+        self.clear_frame(self.content_frame)
+        tk.Label(self.content_frame, text="Accuracy History").pack(pady=10)
+    
+        con = get_db_connection()
+        cursor = con.cursor()
+        cursor.execute('SELECT accuracy FROM deck_accuracies WHERE user_id = ?', (self.user_id,))
+        accuracies = cursor.fetchall()
+        con.close()
+
+        total_accuracy = 0
+        for i, (accuracy,) in enumerate(accuracies):
+            tk.Label(self.content_frame, text=f"Attempt {i}: {accuracy:.2f}%").pack(padx=10, pady=5)
+            total_accuracy += accuracy
         
+        
+        
+        for i, (accuracy,) in enumerate(accuracies):
+            #tk.Label(self.content_frame, text=f"Attempt {i}: {accuracy:.2f}%").pack(padx=10, pady=5)
+            total_accuracy += accuracy
+
+        if accuracies: 
+            overall_accuracy = total_accuracy / len(accuracies) 
+            tk.Label(self.content_frame, text=f"Overall Accuracy: {overall_accuracy:.2f}%").pack(pady=10) 
+        else:
+            tk.Label(self.content_frame, text="No attempts recorded.").pack(pady=10)
+        
+        tk.Button(self.content_frame, text="Back to Main Menu", command=self.show_main_menu).pack(pady=10)
+        tk.Button(self.content_frame, text="Clear Accuracy History", command=lambda: self.clear_deck_accuracies(self.user_id)).pack(pady=10)
+        
+        
+    def clear_deck_accuracies(self, user_id):
+        con = get_db_connection()
+        cursor = con.cursor()
+        cursor.execute('DELETE FROM deck_accuracies WHERE user_id = ?', (user_id,))
+        con.commit()
+        con.close()
+        self.show_acc_page()
+        
+    def next_acc_page(self):
+        self.current_page += 1
+        self.show_acc_page()
+
+    def prev_acc_page(self):
+        self.current_page -= 1
+        self.show_acc_page()
+        
+    
+
+
+
+
+
 
 
         
