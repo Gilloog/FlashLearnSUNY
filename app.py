@@ -1,4 +1,5 @@
 import tkinter as tk
+import random as rand
 from tkinter import messagebox, ttk
 from auth import register_user, login_user, update_streak_badges
 from accuracy import update_user_accuracy, get_user_accuracy
@@ -14,6 +15,7 @@ class FlashLearnApp:
         self.root.geometry("600x400")
         self.engine = pyttsx3.init()
         self.current_page = 0
+        self.acc_page = 0
         
         init_db()
         
@@ -45,6 +47,7 @@ class FlashLearnApp:
         ttk.Button(self.menu_frame, text="Study Mode", command=self.show_study_mode).pack(fill="x", pady=5)
         ttk.Button(self.menu_frame, text="Edit Flashcards", command=self.show_edit_flashcards_screen).pack(fill="x", pady=5)
         ttk.Button(self.menu_frame, text="View Badges", command=self.show_badges_page).pack(fill="x", pady=5)
+        ttk.Button(self.menu_frame, text="Accuracy Stats", command=self.show_acc_page).pack(fill="x", pady=5)
         ttk.Button(self.menu_frame, text="Log Out", command=self.show_login_screen).pack(pady=20)
         
     def show_login_screen(self):
@@ -129,8 +132,9 @@ class FlashLearnApp:
         self.flashcards = get_flashcard(user_id)
         reset_attempts(user_id)
           
-        if self.flashcards: 
-            self.current_flashcard = 0
+        if self.flashcards:
+            self.shuffle_order = self.shuffle(self.flashcards) 
+            self.shown_flashcards = 0
             self.display_flashcard()
         else:
             ttk.Label(self.root, text="No Flashcards Found", style="TLabel").pack()
@@ -139,8 +143,8 @@ class FlashLearnApp:
         
         self.clear_frame(self.content_frame)
     
-        if self.current_flashcard < len(self.flashcards):
-            front_card, back_card = self.flashcards[self.current_flashcard]   
+        if self.shown_flashcards < len(self.flashcards):
+            front_card, back_card = self.flashcards[self.shuffle_order[self.shown_flashcards]]   
             
            
             self.flip_card(front_card, back_card, show_front=True)
@@ -161,6 +165,7 @@ class FlashLearnApp:
         if show_front:
             ttk.Label(self.content_frame, text=f"Front: {front_card}", style="TLabel").pack(pady=10)
             ttk.Button(self.content_frame, text="Flip To Back", command=lambda: self.flip_card(front_card, back_card, show_front=False)).pack(pady=10)
+            ttk.Button(self.content_frame, text="Read Aloud", command=lambda: self.read_aloud(True,back_card,front_card)).pack(pady=10)
             ttk.Button(self.content_frame, text="Correct", command=lambda: self.record_answer(True)).pack(pady=10)
             ttk.Button(self.content_frame, text="Incorrect", command=lambda: self.record_answer(False)).pack(pady=10)
             accuracy =  get_user_accuracy(self.user_id)
@@ -171,6 +176,7 @@ class FlashLearnApp:
         else: 
             ttk.Label(self.content_frame, text=f"Back: {back_card}", style="TLabel").pack(pady=10)
             ttk.Button(self.content_frame, text="Flip to Front", command=lambda: self.flip_card(front_card, back_card, show_front=True)).pack(pady=10)
+            ttk.Button(self.content_frame, text="Read Aloud", command=lambda: self.read_aloud(False,back_card,front_card)).pack(pady=10)
             ttk.Button(self.content_frame, text="Correct", command=lambda: self.record_answer(True)).pack(pady=10)
             ttk.Button(self.content_frame, text="Incorrect", command=lambda: self.record_answer(False)).pack(pady=10)
             accuracy =  get_user_accuracy(self.user_id)
@@ -195,22 +201,33 @@ class FlashLearnApp:
         
     def next_flashcard(self):
         user_id = self.user_id 
-        if self.flashcards and self.current_flashcard < len(self.flashcards)-1: 
-            self.current_flashcard += 1
+        if self.flashcards and self.shown_flashcards < len(self.flashcards)-1: 
+            self.shown_flashcards += 1
             self.clear_frame(self.content_frame)
             self.display_flashcard()
         else: 
             self.clear_frame(self.content_frame)
             ttk.Label(self.content_frame, text="End of Flashcards.\n")
             accuracy =  get_user_accuracy(self.user_id)
+            #print(type(accuracy))
+            self.save_deck_accuracy(self.user_id, accuracy)
             ttk.Label(self.content_frame, text=f"Overall Accuracy: {accuracy:.2f}%", style="TLabel").pack(pady=10)
+            
+            
             ttk.Button(self.content_frame, text="Restart Flashcards", command=self.show_study_mode).pack(pady=10)
             con = get_db_connection()
             cursor = con.cursor()
             cursor.execute("UPDATE users SET accuracy = 0 WHERE id = ?", (user_id,))
             con.commit()
             con.close()
-        
+    
+    def save_deck_accuracy(self, user_id, accuracy):
+        con = get_db_connection()
+        cursor = con.cursor()
+        cursor.execute('INSERT INTO deck_accuracies (user_id, accuracy) VALUES (?, ?)', (user_id, accuracy))
+        con.commit()
+        con.close()
+
     def show_edit_flashcards_screen(self):
         self.clear_frame(self.content_frame)
         self.content_frame.pack(side="right", expand=True, fill="both")
@@ -243,13 +260,13 @@ class FlashLearnApp:
             front_entry = ttk.Entry(self.content_frame)
             front_entry.insert(0, front)
             front_entry.grid(row=row, column=col, padx=5, pady=5)
-            front_entry.bind("<Return>", lambda e, f=flashcard, entry=front_entry: self.update_flashcard_front(f, entry))
+            front_entry.bind("<FocusOut>", lambda e, f=flashcard, entry=front_entry: self.update_flashcard_front(f, entry))
             col += 1
 
             back_entry = ttk.Entry(self.content_frame)
             back_entry.insert(0, back)
             back_entry.grid(row=row, column=col, padx=5, pady=5)
-            back_entry.bind("<Return>", lambda e, f=flashcard, entry=back_entry: self.update_flashcard_back(f, entry))
+            back_entry.bind("<FocusOut>", lambda e, f=flashcard, entry=back_entry: self.update_flashcard_back(f, entry))
             col += 1
             if col > 2:
                 col = 0
@@ -371,7 +388,7 @@ class FlashLearnApp:
         cursor.execute('UPDATE flashcards SET front = ? WHERE id = ?', (front, flashcard_id))
         con.commit()
         con.close()
-        messagebox.showinfo("Success", "Flashcard Front Changed")
+        #messagebox.showinfo("Success", "Flashcard Front Changed")
         self.show_edit_flashcards_screen()
 
     def save_flashcard_back(self, flashcard_id, back):
@@ -380,7 +397,7 @@ class FlashLearnApp:
         cursor.execute('UPDATE flashcards SET back = ? WHERE id = ?', (back, flashcard_id))
         con.commit()
         con.close()
-        messagebox.showinfo("Success", "Flashcard Back Changed")
+        #messagebox.showinfo("Success", "Flashcard Back Changed")
         self.show_edit_flashcards_screen()
 
 
@@ -438,6 +455,55 @@ class FlashLearnApp:
     def clear_frame(self, frame):
         for widget in frame.winfo_children():
             widget.destroy()    
+
+
+    def shuffle(self,cards):
+        shuffled = []
+        numbers = list(range(len(cards)))
+        while numbers :
+            i = rand.randint(0,len(numbers)-1)
+            shuffled.append(numbers[i])
+            numbers.pop(i)
+        return shuffled
+    
+    
+    def show_acc_page(self):
+        self.clear_frame(self.content_frame)
+        tk.Label(self.content_frame, text="Accuracy History").pack(pady=10)
+    
+        con = get_db_connection()
+        cursor = con.cursor()
+        cursor.execute('SELECT accuracy FROM deck_accuracies WHERE user_id = ?', (self.user_id,))
+        accuracies = cursor.fetchall()
+        con.close()
+
+        total_accuracy = 0
+        for i, (accuracy,) in enumerate(accuracies):
+            tk.Label(self.content_frame, text=f"Attempt {i}: {accuracy:.2f}%").pack(padx=10, pady=5)
+            total_accuracy += accuracy
+
+        if accuracies: 
+            overall_accuracy = total_accuracy / len(accuracies) 
+            tk.Label(self.content_frame, text=f"Overall Accuracy: {overall_accuracy:.2f}%").pack(pady=10) 
+        else:
+            tk.Label(self.content_frame, text="No attempts recorded.").pack(pady=10)
+        
+        tk.Button(self.content_frame, text="Back to Main Menu", command=self.show_main_menu).pack(pady=10)
+        tk.Button(self.content_frame, text="Clear Accuracy History", command=lambda: self.clear_deck_accuracies(self.user_id)).pack(pady=10)
+        
+        
+    def clear_deck_accuracies(self, user_id):
+        con = get_db_connection()
+        cursor = con.cursor()
+        cursor.execute('DELETE FROM deck_accuracies WHERE user_id = ?', (user_id,))
+        con.commit()
+        con.close()
+        self.show_acc_page()
+
+
+
+
+
 
         
 if __name__ == "__main__":
