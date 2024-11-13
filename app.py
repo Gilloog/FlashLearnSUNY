@@ -468,7 +468,6 @@ class FlashLearnApp:
     
     
     def show_acc_page(self):
-        acc_nontent = 10
         self.clear_frame(self.content_frame)
         tk.Label(self.content_frame, text="Accuracy History").pack(pady=10)
     
@@ -481,12 +480,6 @@ class FlashLearnApp:
         total_accuracy = 0
         for i, (accuracy,) in enumerate(accuracies):
             tk.Label(self.content_frame, text=f"Attempt {i}: {accuracy:.2f}%").pack(padx=10, pady=5)
-            total_accuracy += accuracy
-        
-        
-        
-        for i, (accuracy,) in enumerate(accuracies):
-            #tk.Label(self.content_frame, text=f"Attempt {i}: {accuracy:.2f}%").pack(padx=10, pady=5)
             total_accuracy += accuracy
 
         if accuracies: 
@@ -506,17 +499,6 @@ class FlashLearnApp:
         con.commit()
         con.close()
         self.show_acc_page()
-        
-    def next_acc_page(self):
-        self.current_page += 1
-        self.show_acc_page()
-
-    def prev_acc_page(self):
-        self.current_page -= 1
-        self.show_acc_page()
-        
-    
-
 
 
 
