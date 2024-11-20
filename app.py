@@ -4,7 +4,6 @@ import matplotlib.backends.backend_tkagg
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import matplotlib.image as img
 import matplotlib.backends.backend_agg
 from PIL import Image
 from tkinter import messagebox, ttk
@@ -154,7 +153,7 @@ class FlashLearnApp:
             front_card, back_card = self.flashcards[self.shuffle_order[self.shown_flashcards]]   
             
 
-            self.flip_card(front_card, back_card, show_front=True)
+            self.flip_card(front_card, back_card, show_front=True, flip=False)
             
             if not hasattr(self, 'card_frame'):
                 self.card_frame = ttk.Frame(self.root)
@@ -165,18 +164,21 @@ class FlashLearnApp:
         else:
             ttk.Label("You have completed all flashcards!", style="TLabel").pack(pady=10)
             
-    def flip_card(self, front_card, back_card, show_front=True):
+    def flip_card(self, front_card, back_card, show_front=True, flip=True):
         
         self.clear_frame(self.content_frame)
         (front_img, back_img) = self.card_imgs(front_card,back_card)
-        fig = plt.figure(figsize=(1,1)) 
-        fig.figimage(front_img if show_front else back_img)
+        fig = plt.figure(figsize=(1,1),facecolor='#C8BAAE')
+        if flip:
+            ani = animation.ArtistAnimation(fig=fig, artists=self.flip_ani(front_img,back_img,show_front,fig), interval = 100, repeat=False)
+        else:
+            fig.figimage(front_img if show_front else back_img)
         canvas = matplotlib.backends.backend_tkagg.FigureCanvasTkAgg(fig, master=self.content_frame)
         canvas.draw()
         canvas.get_tk_widget().pack(pady=10)
         if show_front:
 #            ttk.Label(self.content_frame, text=f"Front: {front_card}", style="TLabel").pack(pady=10)
-            ttk.Button(self.content_frame, text="Flip To Back", command=lambda: self.flip_card(front_card, back_card, show_front=False)).pack(pady=10)
+            ttk.Button(self.content_frame, text="Flip To Back", command=lambda: self.flip_card(front_card, back_card, show_front=False, flip=True)).pack(pady=10)
             ttk.Button(self.content_frame, text="Read Aloud", command=lambda: self.read_aloud(True,back_card,front_card)).pack(pady=10)
             ttk.Button(self.content_frame, text="Correct", command=lambda: self.record_answer(True)).pack(pady=10)
             ttk.Button(self.content_frame, text="Incorrect", command=lambda: self.record_answer(False)).pack(pady=10)
@@ -187,7 +189,7 @@ class FlashLearnApp:
             
         else: 
 #            ttk.Label(self.content_frame, text=f"Back: {back_card}", style="TLabel").pack(pady=10)
-            ttk.Button(self.content_frame, text="Flip to Front", command=lambda: self.flip_card(front_card, back_card, show_front=True)).pack(pady=10)
+            ttk.Button(self.content_frame, text="Flip to Front", command=lambda: self.flip_card(front_card, back_card, show_front=True, flip=True)).pack(pady=10)
             ttk.Button(self.content_frame, text="Read Aloud", command=lambda: self.read_aloud(False,back_card,front_card)).pack(pady=10)
             ttk.Button(self.content_frame, text="Correct", command=lambda: self.record_answer(True)).pack(pady=10)
             ttk.Button(self.content_frame, text="Incorrect", command=lambda: self.record_answer(False)).pack(pady=10)
@@ -515,13 +517,13 @@ class FlashLearnApp:
 
     def card_imgs(self, front_card, back_card):
         fig1 = plt.figure(figsize=(1,1))
-        fig1.text(.5,.5, [front_card], horizontalalignment='center')
+        fig1.text(.5,.5, front_card, horizontalalignment='center')
         front = matplotlib.backends.backend_agg.FigureCanvasAgg(fig1)
         front.draw()
         rgba = np.asarray(front.buffer_rgba())
         front_img = Image.fromarray(rgba)
         fig2 = plt.figure(figsize=(1,1))
-        fig2.text(.5,.5, [back_card], horizontalalignment='center')
+        fig2.text(.5,.5, back_card, horizontalalignment='center', fontsize='10')
         back = matplotlib.backends.backend_agg.FigureCanvasAgg(fig2)
         back.draw()
         rgba = np.asarray(back.buffer_rgba())
@@ -529,16 +531,20 @@ class FlashLearnApp:
         return front_img, back_img
 
 
-    def flip_ani(self, front_img, back_img, show_front):
+    def flip_ani(self, front_img, back_img, show_front, ax):
         artists = []
+        if show_front:
+            front_img, back_img = back_img, front_img
+        artists.append([ax.figimage(front_img)])
         for i in range(20):
-            matrix = (1,0,0,0,1,0,i,.5,1)
-            artists.append(np.asarray(front_img.Transform.PERSPECTIVE(matrix)))
-        for i in range(21):
-            matrix = (1,0,0,0,1,0,i-20,.5,1)
-            artists.append(np.asarray(back_img.Transform.PERSPECTIVE(matrix)))
-        if (show_front):
-            artists.reverse
+            matrix = (-20/(i-20),0,0,0,1,0)
+            trans = np.asarray(front_img.transform(size = front_img.size, method = Image.Transform.AFFINE, data = matrix))
+            artists.append([ax.figimage(trans,animated=True, xo =-100*(i/(2*i-40)))])
+        for i in range(1,20):
+            matrix = (20/i,0,0,0,1,0)
+            trans = np.asarray(back_img.transform(size = back_img.size, method = Image.Transform.AFFINE, data = matrix))
+            artists.append([ax.figimage(trans,animated=True, xo=-100*(.5-10/i))])
+        artists.append([ax.figimage(back_img)])
         return artists
 
 
