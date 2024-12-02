@@ -6,6 +6,10 @@ def register_user(username, password):
     con = get_db_connection()
     cursor = con.cursor()
     
+    if (len(username) < 5 or len(password) < 8) :
+         print("username/password too short")
+         return False
+
     try: 
         cursor.execute('INSERT INTO users (username, password) VALUES (?,?)', (username, password))
         con.commit()
