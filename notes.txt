@@ -1,4 +1,5 @@
 
 pip install Pillow
 pip install tk 
+pip install pyttsx3
 
