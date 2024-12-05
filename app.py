@@ -489,7 +489,7 @@ class FlashLearnApp:
 
         total_accuracy = 0
         for i, (accuracy,) in enumerate(accuracies):
-            tk.Label(self.content_frame, text=f"Attempt {i}: {accuracy:.2f}%").pack(padx=10, pady=5)
+            tk.Label(self.content_frame, text=f"Attempt {i+1}: {accuracy:.2f}%").pack(padx=10, pady=5)
             total_accuracy += accuracy
         if accuracies: 
             overall_accuracy = total_accuracy / len(accuracies) 
