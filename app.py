@@ -248,8 +248,8 @@ class FlashLearnApp:
         
         ttk.Label(self.content_frame, text="Edit Flashcards").grid(row=0, column=0, columnspan=2, pady=10)
         
-        ttk.Button(self.content_frame, text="Create Flashcard", command=self.show_create_flashcards).grid(row=8, column=1, columnspan=2, pady=5)
-        ttk.Button(self.content_frame, text="Delete Flashcard", command=self.show_edit_flashcards_screen_delete).grid(row=8, column=0, columnspan=2, pady=5)
+        ttk.Button(self.content_frame, text="Create Flashcard", command=self.show_create_flashcards).grid(row=8, column=0, columnspan=2, pady=5)
+        ttk.Button(self.content_frame, text="Delete Flashcard", command=self.show_edit_flashcards_screen_delete).grid(row=8, column=2, columnspan=2, pady=5)
         
 
         self.flashcards = self.get_flashcards(self.user_id)
