@@ -247,7 +247,6 @@ class FlashLearnApp:
         self.content_frame.pack(side="right", expand=True, fill="both")
         
         ttk.Label(self.content_frame, text="Edit Flashcards").grid(row=0, column=0, columnspan=2, pady=10)
-        
         ttk.Button(self.content_frame, text="Create Flashcard", command=self.show_create_flashcards).grid(row=8, column=0, columnspan=2, pady=5)
         ttk.Button(self.content_frame, text="Delete Flashcard", command=self.show_edit_flashcards_screen_delete).grid(row=8, column=2, columnspan=2, pady=5)
         
@@ -276,7 +275,6 @@ class FlashLearnApp:
             front_entry.grid(row=row, column=col, padx=5, pady=5)
             front_entry.bind("<FocusOut>", lambda e, f=flashcard, entry=front_entry: self.update_flashcard_front(f, entry))
             col += 1
-
             back_entry = ttk.Entry(self.content_frame)
             back_entry.insert(0, back)
             back_entry.grid(row=row, column=col, padx=5, pady=5)
@@ -299,7 +297,6 @@ class FlashLearnApp:
         self.clear_frame(self.content_frame)
         ttk.Label(self.content_frame, text="Delete Flashcards").grid(row=0, column=0, columnspan=2, pady=10)
         ttk.Button(self.content_frame, text="Done", command=self.show_edit_flashcards_screen).grid(row=9, column=0, columnspan=2, pady=5)
-
         self.flashcards = self.get_flashcards(self.user_id)
         if self.flashcards is None:
             self.flashcards = []
@@ -378,7 +375,6 @@ class FlashLearnApp:
         front_text = ttk.Entry(self.content_frame)
         front_text.insert(0, flashcard[1])
         front_text.pack(pady=5)
-
         back_text = ttk.Entry(self.content_frame)
         back_text.insert(0, flashcard[2])
         back_text.pack(pady=5)
@@ -495,7 +491,6 @@ class FlashLearnApp:
         for i, (accuracy,) in enumerate(accuracies):
             tk.Label(self.content_frame, text=f"Attempt {i}: {accuracy:.2f}%").pack(padx=10, pady=5)
             total_accuracy += accuracy
-
         if accuracies: 
             overall_accuracy = total_accuracy / len(accuracies) 
             tk.Label(self.content_frame, text=f"Overall Accuracy: {overall_accuracy:.2f}%").pack(pady=10) 
