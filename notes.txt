@@ -5,3 +5,4 @@ pip install Pillow
 pip install tk 
 pip install pyttsx3
 
+When registering a new account a password with at least a length of 8 characters must be used.
